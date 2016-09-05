@@ -10,23 +10,39 @@ namespace ConsoleApplication4
 {
     class Program
     {
+        private static ICommandInvoker _commandInvoker;
+
         static void Main(string[] args)
         {
             var container = BuildContainer();
 
-            var commandInvoker = container.Resolve<ICommandInvoker>();
+            _commandInvoker = container.Resolve<ICommandInvoker>();
 
-            // simple command invocation example
-            commandInvoker.Invoke<IStoreAddressCommand>(x => x.Execute());
+            // example usage:
 
-
-            // example with return value
-            var result1 = commandInvoker.Invoke<IGetPropsectCommand, int>(x => x.Execute());
-
-            // async example
-            var result2 = commandInvoker.Invoke<IStoreProspectCommand, Task<int>>(x => x.ExecuteAsync()).GetAwaiter().GetResult();
+            DoSomething();
             
+            var result1 = DoSomethingWithResult();
+
+            var result2 = DoSomethingWithResultAsync().GetAwaiter().GetResult();
+
+
         }
+
+        private static void DoSomething()
+        {
+            _commandInvoker.Invoke<IStoreAddressCommand>(x => x.Execute());
+        }
+
+        private static int DoSomethingWithResult()
+        {
+            return _commandInvoker.Invoke<IGetPropsectCommand, int>(x => x.Execute());
+        }
+
+        private static async Task<int> DoSomethingWithResultAsync()
+        {
+            return await _commandInvoker.Invoke<IStoreProspectCommand, Task<int>>(async x => await x.ExecuteAsync());
+        } 
 
         private static IContainer BuildContainer()
         {

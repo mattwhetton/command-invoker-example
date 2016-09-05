@@ -8,10 +8,9 @@ namespace ConsoleApplication4
 {
     public interface ICommandInvoker
     {
-        void Invoke<T>(Expression<Action<T>> expression) where T : ICommand;
-
-        TResult Invoke<TCommand, TResult>(Expression<Func<TCommand, TResult>> expression) where TCommand:ICommand;
-            
+        void Invoke<T>(Action<T> method) where T : ICommand;
+        
+        TResult Invoke<TCommand, TResult>(Func<TCommand, TResult> method) where TCommand : ICommand;
     }
 
 
@@ -24,23 +23,23 @@ namespace ConsoleApplication4
             _commands = commands;
         }
 
-        public void Invoke<TCommand>(Expression<Action<TCommand>> expression) where TCommand:ICommand
+        public void Invoke<TCommand>(Action<TCommand> method) where TCommand:ICommand
         {
             var command = _commands.OfType<TCommand>().FirstOrDefault();
             if (command != null)
             {
-                expression.Compile().Invoke(command);
+                method.Invoke(command);
                 return;
             }
             throw new ArgumentException(nameof(TCommand));
         }
-
-        public TResult Invoke<TCommand, TResult>(Expression<Func<TCommand, TResult>> expression) where TCommand:ICommand
+        
+        public TResult Invoke<TCommand, TResult>(Func<TCommand, TResult> method) where TCommand : ICommand
         {
             var command = _commands.OfType<TCommand>().FirstOrDefault();
             if (command != null)
             {
-                return expression.Compile().Invoke(command);
+                return method.Invoke(command);
             }
             throw new ArgumentException(nameof(TCommand));
         }
